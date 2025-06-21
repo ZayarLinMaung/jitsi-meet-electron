@@ -1,12 +1,8 @@
 // @flow
 
-import Button from '@atlaskit/button';
-import { FieldTextStateless } from '@atlaskit/field-text';
-import { SpotlightTarget } from '@atlaskit/onboarding';
 import Page from '@atlaskit/page';
 import { AtlasKitThemeProvider } from '@atlaskit/theme';
 
-import { generateRoomWithoutSeparator } from '@jitsi/js-utils/random';
 import React, { Component } from 'react';
 import { withTranslation } from 'react-i18next';
 import { compose } from 'redux';
@@ -14,12 +10,11 @@ import type { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 
-import { Navbar } from '../../navbar';
-import { Onboarding, startOnboarding } from '../../onboarding';
-import { RecentList } from '../../recent-list';
 import { createConferenceObjectFromURL } from '../../utils';
+import LogoSVG from '../../../images/medcomvision-removebg-preview.png';
+import QRScanner from './QRScanner';
 
-import { Body, FieldWrapper, Form, Header, Label, Wrapper } from '../styled';
+import { Body, Header, Wrapper } from '../styled';
 
 type Props = {
 
@@ -40,27 +35,6 @@ type Props = {
 };
 
 type State = {
-
-    /**
-     * Timer for animating the room name geneeration.
-     */
-    animateTimeoutId: ?TimeoutID,
-
-    /**
-     * Generated room name.
-     */
-    generatedRoomname: string,
-
-    /**
-     * Current room name placeholder.
-     */
-    roomPlaceholder: string,
-
-    /**
-     * Timer for re-generating a new room name.
-     */
-    updateTimeoutId: ?TimeoutID,
-
     /**
      * URL of the room to join.
      * If this is not a url it will be treated as room name for default domain.
@@ -93,42 +67,31 @@ class Welcome extends Component<Props, State> {
         }
 
         this.state = {
-            animateTimeoutId: undefined,
-            generatedRoomname: '',
-            roomPlaceholder: '',
-            updateTimeoutId: undefined,
             url
         };
 
-        // Bind event handlers.
-        this._animateRoomnameChanging = this._animateRoomnameChanging.bind(this);
-        this._onURLChange = this._onURLChange.bind(this);
-        this._onFormSubmit = this._onFormSubmit.bind(this);
-        this._onJoin = this._onJoin.bind(this);
-        this._updateRoomname = this._updateRoomname.bind(this);
+        // Bind event handlers - only keeping what we need for QR scanning
+        this._onQRScanSuccess = this._onQRScanSuccess.bind(this);
     }
 
     /**
      * Start Onboarding once component is mounted.
-     * Start generating randdom room names.
      *
-     * NOTE: It autonatically checks if the onboarding is shown or not.
+     * NOTE: It automatically checks if the onboarding is shown or not.
      *
      * @returns {void}
      */
     componentDidMount() {
-        this.props.dispatch(startOnboarding('welcome-page'));
-
-        this._updateRoomname();
+        // Removed onboarding initialization
     }
 
     /**
      * Stop all timers when unmounting.
      *
-     * @returns {voidd}
+     * @returns {void}
      */
     componentWillUnmount() {
-        this._clearTimeouts();
+        // No longer need to clear timeouts since we removed room name generation
     }
 
     /**
@@ -138,103 +101,15 @@ class Welcome extends Component<Props, State> {
      */
     render() {
         return (
-            <Page navigation = { <Navbar /> }>
+            <Page>
                 <AtlasKitThemeProvider mode = 'light'>
                     <Wrapper>
                         { this._renderHeader() }
                         { this._renderBody() }
-                        <Onboarding section = 'welcome-page' />
                     </Wrapper>
                 </AtlasKitThemeProvider>
             </Page>
         );
-    }
-
-    _animateRoomnameChanging: (string) => void;
-
-    /**
-     * Animates the changing of the room name.
-     *
-     * @param {string} word - The part of room name that should be added to
-     * placeholder.
-     * @private
-     * @returns {void}
-     */
-    _animateRoomnameChanging(word: string) {
-        let animateTimeoutId;
-        const roomPlaceholder = this.state.roomPlaceholder + word.slice(0, 1);
-
-        if (word.length > 1) {
-            animateTimeoutId
-                = setTimeout(
-                    () => {
-                        this._animateRoomnameChanging(
-                            word.substring(1, word.length));
-                    },
-                    70);
-        }
-        this.setState({
-            animateTimeoutId,
-            roomPlaceholder
-        });
-    }
-
-    /**
-     * Method that clears timeouts for animations and updates of room name.
-     *
-     * @private
-     * @returns {void}
-     */
-    _clearTimeouts() {
-        clearTimeout(this.state.animateTimeoutId);
-        clearTimeout(this.state.updateTimeoutId);
-    }
-
-    _onFormSubmit: (*) => void;
-
-    /**
-     * Prevents submission of the form and delegates the join logic.
-     *
-     * @param {Event} event - Event by which this function is called.
-     * @returns {void}
-     */
-    _onFormSubmit(event: Event) {
-        event.preventDefault();
-        this._onJoin();
-    }
-
-    _onJoin: (*) => void;
-
-    /**
-     * Redirect and join conference.
-     *
-     * @returns {void}
-     */
-    _onJoin() {
-        const inputURL = this.state.url || this.state.generatedRoomname;
-        const conference = createConferenceObjectFromURL(inputURL);
-
-        // Don't navigate if conference couldn't be created
-        if (!conference) {
-            return;
-        }
-
-        this.props.dispatch(push('/conference', conference));
-    }
-
-    _onURLChange: (*) => void;
-
-    /**
-     * Keeps URL input value and URL in state in sync.
-     *
-     * @param {SyntheticInputEvent<HTMLInputElement>} event - Event by which
-     * this function is called.
-     * @returns {void}
-     */
-    _onURLChange(event: SyntheticInputEvent<HTMLInputElement>) {
-        this.setState({
-            url: event.currentTarget.value
-        });
     }
 
     /**
@@ -245,7 +120,7 @@ class Welcome extends Component<Props, State> {
     _renderBody() {
         return (
             <Body>
-                <RecentList />
+                {/* <RecentList /> */}
             </Body>
         );
     }
@@ -256,60 +131,38 @@ class Welcome extends Component<Props, State> {
      * @returns {ReactElement}
      */
     _renderHeader() {
-        const locationState = this.props.location.state;
-        const locationError = locationState && locationState.error;
-        const { t } = this.props;
-
         return (
             <Header>
-                <SpotlightTarget name = 'conference-url'>
-                    <Form onSubmit = { this._onFormSubmit }>
-                        <Label>{ t('enterConferenceNameOrUrl') } </Label>
-                        <FieldWrapper>
-                            <FieldTextStateless
-                                autoFocus = { true }
-                                isInvalid = { locationError }
-                                isLabelHidden = { true }
-                                onChange = { this._onURLChange }
-                                placeholder = { this.state.roomPlaceholder }
-                                shouldFitContainer = { true }
-                                type = 'text'
-                                value = { this.state.url } />
-                            <Button
-                                appearance = 'primary'
-                                onClick = { this._onJoin }
-                                type = 'button'>
-                                { t('go') }
-                            </Button>
-                        </FieldWrapper>
-                    </Form>
-                </SpotlightTarget>
+                <img src = { LogoSVG } alt = 'Medcom Vision Logo' style={{ height: '50px', marginBottom: '20px' }} />
+                
+                <QRScanner 
+                    onScanSuccess={this._onQRScanSuccess}
+                    onClose={() => {
+                        // Optional: Allow closing scanner, but for now we'll keep it always visible
+                        // If you want to allow closing, uncomment the next line:
+                        // this.setState({ showQRScanner: false });
+                    }}
+                />
             </Header>
         );
     }
 
-    _updateRoomname: () => void;
-
     /**
-     * Triggers the generation of a new room name and initiates an animation of
-     * its changing.
+     * Handle successful QR scan.
      *
-     * @protected
+     * @param {string} scannedData - The scanned QR code data.
      * @returns {void}
      */
-    _updateRoomname() {
-        const generatedRoomname = generateRoomWithoutSeparator();
-        const roomPlaceholder = '';
-        const updateTimeoutId = setTimeout(this._updateRoomname, 10000);
-
-        this._clearTimeouts();
-        this.setState(
-            {
-                generatedRoomname,
-                roomPlaceholder,
-                updateTimeoutId
-            },
-            () => this._animateRoomnameChanging(generatedRoomname));
+    _onQRScanSuccess(scannedData: string) {
+        console.log('QR scan successful:', scannedData);
+        
+        // Auto-join immediately when QR code is scanned
+        const conference = createConferenceObjectFromURL(scannedData);
+        if (conference) {
+            this.props.dispatch(push('/conference', conference));
+        } else {
+            console.error('Invalid meeting URL from QR code:', scannedData);
+        }
     }
 }
 

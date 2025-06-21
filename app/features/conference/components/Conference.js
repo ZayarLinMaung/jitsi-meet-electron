@@ -15,6 +15,7 @@ import { parseURLParams } from '../../utils/parseURLParams';
 import { conferenceEnded, conferenceJoined } from '../actions';
 import JitsiMeetExternalAPI from '../external_api';
 import { LoadingIndicator, Wrapper } from '../styled';
+import RecordingControls from './RecordingControls';
 
 // For enabling remote control, please change ENABLE_REMOTE_CONTROL flag in
 // main.js to true as well
@@ -181,6 +182,7 @@ class Conference extends Component<Props, State> {
         return (
             <Wrapper innerRef = { this._ref }>
                 { this._maybeRenderLoadingIndicator() }
+                <RecordingControls api = { this._api } />
             </Wrapper>
         );
     }

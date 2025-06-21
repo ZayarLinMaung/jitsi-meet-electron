@@ -7,42 +7,23 @@ import { SpotlightTarget } from '@atlaskit/onboarding';
 import React, { Component } from 'react';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
-import type { Dispatch } from 'redux';
 import { compose } from 'redux';
 
 import { closeDrawer, DrawerContainer, Logo } from '../../navbar';
-import { Onboarding, startOnboarding } from '../../onboarding';
 import { SettingsContainer, TogglesContainer } from '../styled';
 import {
-    setWindowAlwaysOnTop, setDisableAGC
+    setWindowAlwaysOnTop, setDisableAGC, setCurrentVideoDevice
 } from '../actions';
 
 import SettingToggle from './SettingToggle';
 import ServerURLField from './ServerURLField';
 import ServerTimeoutField from './ServerTimeoutField';
-
-type Props = {
-
-    /**
-     * Redux dispatch.
-     */
-    dispatch: Dispatch<*>;
-
-    /**
-     * Is the drawer open or not.
-     */
-    isOpen: boolean;
-
-    /**
-     * I18next translation function.
-     */
-    t: Function;
-};
+import VideoDeviceSelector from './VideoDeviceSelector';
 
 /**
  * Drawer that open when SettingsAction is clicked.
  */
-class SettingsDrawer extends Component<Props, *> {
+class SettingsDrawer extends Component {
     /**
      * Initializes a new {@code SettingsDrawer} instance.
      *
@@ -52,25 +33,7 @@ class SettingsDrawer extends Component<Props, *> {
         super(props);
 
         this._onBackButton = this._onBackButton.bind(this);
-    }
-
-    /**
-     * Start Onboarding once component is mounted.
-     *
-     * NOTE: It automatically checks if the onboarding is shown or not.
-     *
-     * @param {Props} prevProps - Props before component updated.
-     * @returns {void}
-     */
-    componentDidUpdate(prevProps: Props) {
-        if (!prevProps.isOpen && this.props.isOpen) {
-
-            // TODO - Find a better way for this.
-            // Delay for 300ms to let drawer open.
-            setTimeout(() => {
-                this.props.dispatch(startOnboarding('settings-drawer'));
-            }, 300);
-        }
+        this._onVideoDeviceSelect = this._onVideoDeviceSelect.bind(this);
     }
 
     /**
@@ -108,15 +71,15 @@ class SettingsDrawer extends Component<Props, *> {
                                 settingChangeEvent = { setDisableAGC }
                                 settingName = 'disableAGC' />
                         </TogglesContainer>
-                        <Onboarding section = 'settings-drawer' />
+                        <VideoDeviceSelector
+                            onDeviceSelect={this._onVideoDeviceSelect}
+                            currentDeviceId={this.props._currentVideoDeviceId}
+                        />
                     </SettingsContainer>
                 </DrawerContainer>
             </AkCustomDrawer>
         );
     }
-
-
-    _onBackButton: (*) => void;
 
     /**
      * Closes the drawer when back button is clicked.
@@ -125,6 +88,23 @@ class SettingsDrawer extends Component<Props, *> {
      */
     _onBackButton() {
         this.props.dispatch(closeDrawer());
+    }
+
+    /**
+     * Handles video device selection.
+     */
+    _onVideoDeviceSelect(deviceId) {
+        // Store the selected device ID
+        this.props.dispatch(setCurrentVideoDevice(deviceId));
+        
+        // If in a conference, switch the video device
+        if (this.props._api) {
+            this.props._api.executeCommand('setVideoInputDevice', deviceId);
+        }
+    }
+
+    componentDidUpdate(prevProps) {
+        // Removed onboarding initialization
     }
 }
 

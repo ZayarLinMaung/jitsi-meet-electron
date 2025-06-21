@@ -38,3 +38,13 @@ export const SET_SERVER_URL = Symbol('SET_SERVER_URL');
  * }
  */
 export const SET_SERVER_TIMEOUT = Symbol('SET_SERVER_TIMEOUT');
+
+/**
+ * The type of (redux) action that sets the current video device.
+ *
+ * @type {
+ *     type: SET_CURRENT_VIDEO_DEVICE,
+ *     currentVideoDevice: string
+ * }
+ */
+export const SET_CURRENT_VIDEO_DEVICE = Symbol('SET_CURRENT_VIDEO_DEVICE');

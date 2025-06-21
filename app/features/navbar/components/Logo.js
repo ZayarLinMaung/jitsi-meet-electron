@@ -4,7 +4,7 @@ import Icon from '@atlaskit/icon';
 
 import React, { Component } from 'react';
 
-import LogoSVG from '../../../images/logo.svg';
+import LogoSVG from '../../../images/medcomvision-removebg-preview.svg';
 
 /**
  * Logo component.

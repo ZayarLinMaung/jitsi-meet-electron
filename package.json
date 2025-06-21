@@ -1,12 +1,12 @@
 {
-  "name": "jitsi-meet-electron",
+  "name": "medcom-electron",
   "version": "2025.4.0",
-  "description": "Electron application for Jitsi Meet",
+  "description": "Electron application for Medcom",
   "main": "./build/main.js",
-  "productName": "Jitsi Meet",
+  "productName": "Medcom",
   "private": true,
   "scripts": {
-    "start": "webpack --config ./webpack.main.js --mode development && concurrently \"npm:watch\" \"electron ./build/main.js\"",
+    "start": "webpack --config ./webpack.main.js --mode development && concurrently \"npm:watch\" \"electron ./build/main.js --no-sandbox\"",
     "clean": "rm -rf node_modules build dist",
     "lint": "eslint . && flow",
     "build": "webpack --config ./webpack.main.js --mode production && webpack --config ./webpack.renderer.js --mode production",
@@ -18,8 +18,8 @@
     "node": ">=14.0.0"
   },
   "build": {
-    "appId": "org.jitsi.jitsi-meet",
-    "productName": "Jitsi Meet",
+    "appId": "com.medcom.app",
+    "productName": "Medcom",
     "generateUpdatesFilesForAllChannels": true,
     "npmRebuild": false,
     "files": [
@@ -44,8 +44,8 @@
       "darkModeSupport": true,
       "entitlements": "resources/entitlements.mac.plist",
       "extendInfo": {
-        "NSCameraUsageDescription": "Jitsi Meet requires access to your camera in order to make video-calls.",
-        "NSMicrophoneUsageDescription": "Jitsi Meet requires access to your microphone in order to make calls (audio/video).",
+        "NSCameraUsageDescription": "Medcom requires access to your camera in order to make video-calls.",
+        "NSMicrophoneUsageDescription": "Medcom requires access to your microphone in order to make calls (audio/video).",
         "LSMultipleInstancesProhibited": true
       }
     },
@@ -55,10 +55,10 @@
       "hardenedRuntime": false
     },
     "linux": {
-      "artifactName": "jitsi-meet-${arch}.${ext}",
+      "artifactName": "medcomvision-${arch}.${ext}",
       "category": "VideoConference;AudioVideo;Audio;Video;Network",
-      "description": "Jitsi Meet Desktop App",
-      "executableName": "jitsi-meet",
+      "description": "MedcomVision Desktop App",
+      "executableName": "medcomvision",
       "target": [
         {
           "arch": "x64",
@@ -79,7 +79,7 @@
       ]
     },
     "win": {
-      "artifactName": "jitsi-meet.${ext}",
+      "artifactName": "medcomvision.${ext}",
       "target": [
         {
           "arch": [
@@ -96,10 +96,10 @@
     },
     "protocols": [
       {
-        "name": "jitsi-protocol",
+        "name": "medcomvision-protocol",
         "role": "Viewer",
         "schemes": [
-          "jitsi-meet"
+          "medcomvision"
         ]
       }
     ]
@@ -112,19 +112,19 @@
     "url": "git://github.com/jitsi/jitsi-meet-electron"
   },
   "keywords": [
-    "jingle",
     "webrtc",
-    "xmpp",
     "electron",
-    "jitsi-meet"
+    "medcomvision",
+    "video-conference"
   ],
-  "author": "Jitsi Team <support@jitsi.org>",
+  "author": "MedcomVision Team <contact@medcomvision.com>",
   "readmeFilename": "README.md",
   "license": "Apache-2.0",
   "dependencies": {
     "@jitsi/electron-sdk": "7.0.6",
     "electron-debug": "^3.2.0",
-    "electron-reload": "^1.5.0"
+    "electron-reload": "^1.5.0",
+    "jsqr": "^1.4.0"
   },
   "devDependencies": {
     "@atlaskit/button": "^10.1.3",

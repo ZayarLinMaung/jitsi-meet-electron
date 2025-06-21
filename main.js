@@ -35,6 +35,15 @@ const ENABLE_REMOTE_CONTROL = false;
 // We need this because of https://github.com/electron/electron/issues/18214
 app.commandLine.appendSwitch('disable-site-isolation-trials');
 
+// Enable camera and media access
+app.commandLine.appendSwitch('enable-media-stream');
+app.commandLine.appendSwitch('enable-usermedia-screen-capturing');
+app.commandLine.appendSwitch('enable-usermedia-capture-devices');
+app.commandLine.appendSwitch('enable-usermedia-capture-devices-list');
+app.commandLine.appendSwitch('allow-running-insecure-content');
+app.commandLine.appendSwitch('disable-web-security');
+app.commandLine.appendSwitch('ignore-certificate-errors');
+
 // Fix screen-sharing thumbnails being missing sometimes.
 // https://github.com/electron/electron/issues/44504
 const disabledFeatures = [
@@ -84,9 +93,7 @@ if (isDev) {
 }
 
 /**
- * The window object that will load the iframe with Jitsi Meet.
- * IMPORTANT: Must be defined as global in order to not be garbage collected
- * acidentally.
+ * The window object that will load the iframe with Medcom.
  */
 let mainWindow = null;
 
@@ -171,7 +178,7 @@ function setApplicationMenu() {
 }
 
 /**
- * Opens new window with index.html(Jitsi Meet is loaded in iframe there).
+ * Opens new window with index.html(Medcom is loaded in iframe there).
  */
 function createJitsiMeetWindow() {
     // Application menu.
@@ -184,9 +191,9 @@ function createJitsiMeetWindow() {
 
     // Load the previous window state with fallback to defaults.
     const windowState = windowStateKeeper({
-        defaultWidth: 800,
-        defaultHeight: 600,
-        fullScreen: false
+        defaultWidth: 1200,
+        defaultHeight: 800,
+        fullScreen: true
     });
 
     // Path to root directory.
@@ -199,7 +206,7 @@ function createJitsiMeetWindow() {
         slashes: true
     });
 
-    // Options used when creating the main Jitsi Meet window.
+    // Options used when creating the main Medcom window.
     // Use a preload script in order to provide node specific functionality
     // to a isolated BrowserWindow in accordance with electron security
     // guideline.
@@ -209,15 +216,17 @@ function createJitsiMeetWindow() {
         width: windowState.width,
         height: windowState.height,
         icon: path.resolve(basePath, './resources/icon.png'),
-        minWidth: 800,
-        minHeight: 600,
+        minWidth: 1000,
+        minHeight: 700,
         show: false,
         webPreferences: {
             enableBlinkFeatures: 'WebAssemblyCSP',
             contextIsolation: false,
             nodeIntegration: false,
             preload: path.resolve(basePath, './build/preload.js'),
-            sandbox: false
+            sandbox: false,
+            webSecurity: false,
+            allowRunningInsecureContent: true
         }
     };
 
@@ -316,6 +325,30 @@ function createJitsiMeetWindow() {
         if (permission === 'openExternal') {
             console.warn(`Disallowing opening ${details.externalURL}`);
             callback(false);
+
+            return;
+        }
+
+        // Allow camera permissions for QR scanning
+        if (permission === 'camera') {
+            console.log('Allowing camera permission for QR scanning');
+            callback(true);
+
+            return;
+        }
+
+        // Allow microphone permissions for video calls
+        if (permission === 'microphone') {
+            console.log('Allowing microphone permission for calls');
+            callback(true);
+
+            return;
+        }
+
+        // Allow media permissions
+        if (permission === 'media') {
+            console.log('Allowing media permission');
+            callback(true);
 
             return;
         }
